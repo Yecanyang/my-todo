@@ -35,19 +35,35 @@
         /* 看板樣式 */
         .main-section { margin-bottom: 30px; background: #eef2f7; padding: 15px; border-radius: var(--border-radius); }
         .section-title { font-size: 1.2rem; margin-bottom: 15px; padding-left: 8px; border-left: 5px solid var(--primary-color); color: #2c3e50; font-weight: bold; }
+        
+        /* 樓層快速篩選列 */
+        .filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 8px; align-items: center; }
+        .filter-label { font-size: 0.85rem; font-weight: bold; color: #666; margin-right: 5px; }
+        .filter-btn { background: #eee; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .filter-btn.active { background: #e65100; color: white; font-weight: bold; }
+
         .columns-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 768px) { .columns-container { grid-template-columns: repeat(3, 1fr); } }
         .column { background: var(--card-bg); border-radius: var(--border-radius); padding: 15px; display: flex; flex-direction: column; }
         .column-title { font-size: 1rem; color: #7f8c8d; margin-bottom: 12px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; font-weight: 600; }
-        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        
+        /* 帶有樓層選單的輸入群組 */
+        .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+        .input-row { display: flex; gap: 6px; }
+        .floor-select { width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #fff; }
         .todo-input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
-        .add-btn { background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; }
+        .add-btn { background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
         .todo-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
         .todo-item { display: flex; align-items: center; background: #fdfdfd; padding: 10px 12px; border-radius: 8px; border: 1px solid #eaeaea; }
-        .todo-checkbox { width: 18px; height: 18px; margin-right: 10px; }
+        .todo-item.hidden-by-filter { display: none !important; } /* 被篩選隱藏的樣式 */
+        .todo-checkbox { width: 18px; height: 18px; margin-right: 10px; cursor: pointer; }
         .todo-text { font-size: 0.95rem; flex: 1; word-break: break-all; }
         .todo-item.completed .todo-text { text-decoration: line-through; color: #b0b0b0; }
-        .delete-btn { background: transparent; color: var(--danger-color); border: none; font-size: 1.1rem; margin-left: 10px; }
+        .delete-btn { background: transparent; color: var(--danger-color); border: none; font-size: 1.1rem; margin-left: 10px; cursor: pointer; }
+        
+        /* 樓層標籤樣式 (橘色調更醒目) */
+        .floor-tag { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; padding: 1px 5px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-right: 6px; display: inline-block; }
 
         /* 廠商表單與歷史紀錄樣式 */
         .form-card { background: white; padding: 20px; border-radius: var(--border-radius); margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -109,17 +125,17 @@
             <div class="columns-container">
                 <div class="column" id="col-myjob-1">
                     <div class="column-title">請款</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增請款項目..."><button class="add-btn" onclick="addTodoItem('col-myjob-1')">+</button></div>
+                    <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增請款項目..."><button class="add-btn" onclick="addTodoItem('col-myjob-1', false)">+</button></div></div>
                     <ul class="todo-list"></ul>
                 </div>
                 <div class="column" id="col-myjob-2">
                     <div class="column-title">寄信清單</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增寄信任務..."><button class="add-btn" onclick="addTodoItem('col-myjob-2')">+</button></div>
+                    <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增寄信任務..."><button class="add-btn" onclick="addTodoItem('col-myjob-2', false)">+</button></div></div>
                     <ul class="todo-list"></ul>
                 </div>
                 <div class="column" id="col-myjob-3">
                     <div class="column-title">零用金</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增零用金記錄..."><button class="add-btn" onclick="addTodoItem('col-myjob-3')">+</button></div>
+                    <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增零用金記錄..."><button class="add-btn" onclick="addTodoItem('col-myjob-3', false)">+</button></div></div>
                     <ul class="todo-list"></ul>
                 </div>
             </div>
@@ -129,37 +145,84 @@
             <div class="columns-container">
                 <div class="column" id="col-point-1">
                     <div class="column-title">進行中</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增進行中項目..."><button class="add-btn" onclick="addTodoItem('col-point-1')">+</button></div>
+                    <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增進行中項目..."><button class="add-btn" onclick="addTodoItem('col-point-1', false)">+</button></div></div>
                     <ul class="todo-list"></ul>
                 </div>
                 <div class="column" id="col-point-2">
                     <div class="column-title">尚未完成</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增待辦項目..."><button class="add-btn" onclick="addTodoItem('col-point-2')">+</button></div>
+                    <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增待辦項目..."><button class="add-btn" onclick="addTodoItem('col-point-2', false)">+</button></div></div>
                     <ul class="todo-list"></ul>
                 </div>
                 <div class="column" id="col-point-3">
                     <div class="column-title">已完成</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增已完成記錄..."><button class="add-btn" onclick="addTodoItem('col-point-3')">+</button></div>
+                    <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增已完成記錄..."><button class="add-btn" onclick="addTodoItem('col-point-3', false)">+</button></div></div>
                     <ul class="todo-list"></ul>
                 </div>
             </div>
         </div>
+        
         <div class="main-section">
             <div class="section-title">🔧 缺失修改分類</div>
+            
+            <div class="filter-bar">
+                <span class="filter-label">🔍 樓層切換：</span>
+                <button class="filter-btn active" onclick="filterFloor('ALL', this)">全部樓層</button>
+                <button class="filter-btn" onclick="filterFloor('2F', this)">2F</button>
+                <button class="filter-btn" onclick="filterFloor('3F', this)">3F</button>
+                <button class="filter-btn" onclick="filterFloor('4F', this)">4F</button>
+                <button class="filter-btn" onclick="filterFloor('5F', this)">5F</button>
+                <button class="filter-btn" onclick="filterFloor('6F', this)">6F</button>
+                <button class="filter-btn" onclick="filterFloor('7F', this)">7F</button>
+                <button class="filter-btn" onclick="filterFloor('8F', this)">8F</button>
+            </div>
+
             <div class="columns-container">
                 <div class="column" id="col-defect-1">
                     <div class="column-title">AB棟</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增AB棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-1')">+</button></div>
+                    <div class="input-group">
+                        <div class="input-row">
+                            <select class="floor-select">
+                                <option value="2F" selected>2F</option><option value="3F">3F</option>
+                                <option value="4F">4F</option><option value="5F">5F</option>
+                                <option value="6F">6F</option><option value="7F">7F</option>
+                                <option value="8F">8F</option>
+                            </select>
+                            <input type="text" class="todo-input" placeholder="新增AB棟缺失...">
+                            <button class="add-btn" onclick="addTodoItem('col-defect-1', true)">+</button>
+                        </div>
+                    </div>
                     <ul class="todo-list"></ul>
                 </div>
                 <div class="column" id="col-defect-2">
                     <div class="column-title">DE棟</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增DE棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-2')">+</button></div>
+                    <div class="input-group">
+                        <div class="input-row">
+                            <select class="floor-select">
+                                <option value="2F" selected>2F</option><option value="3F">3F</option>
+                                <option value="4F">4F</option><option value="5F">5F</option>
+                                <option value="6F">6F</option><option value="7F">7F</option>
+                                <option value="8F">8F</option>
+                            </select>
+                            <input type="text" class="todo-input" placeholder="新增DE棟缺失...">
+                            <button class="add-btn" onclick="addTodoItem('col-defect-2', true)">+</button>
+                        </div>
+                    </div>
                     <ul class="todo-list"></ul>
                 </div>
                 <div class="column" id="col-defect-3">
                     <div class="column-title">FG棟</div>
-                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增FG棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-3')">+</button></div>
+                    <div class="input-group">
+                        <div class="input-row">
+                            <select class="floor-select">
+                                <option value="2F" selected>2F</option><option value="3F">3F</option>
+                                <option value="4F">4F</option><option value="5F">5F</option>
+                                <option value="6F">6F</option><option value="7F">7F</option>
+                                <option value="8F">8F</option>
+                            </select>
+                            <input type="text" class="todo-input" placeholder="新增FG棟缺失...">
+                            <button class="add-btn" onclick="addTodoItem('col-defect-3', true)">+</button>
+                        </div>
+                    </div>
                     <ul class="todo-list"></ul>
                 </div>
             </div>
@@ -208,8 +271,7 @@
                             <th>日期</th><th>廠商</th><th>時間</th><th>人數</th><th>紀錄工項</th><th>操作</th>
                         </tr>
                     </thead>
-                    <tbody id="vendor-history-tbody">
-                        </tbody>
+                    <tbody id="vendor-history-tbody"></tbody>
                 </table>
             </div>
         </div>
@@ -220,9 +282,9 @@
         let todoData = {};
         let vendorLogs = [];
         let currentPage = 'todo-page';
+        let currentFloorFilter = 'ALL'; // 目前篩選的樓層
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 自動帶入今天目前的時間
             const now = new Date();
             const timeString = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
             document.getElementById('v-time').value = timeString;
@@ -235,15 +297,12 @@
             }
         });
 
-        // 分頁切換
         function switchPage(pageId, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-            
             btn.classList.add('active');
             document.getElementById(pageId).classList.add('active');
             currentPage = pageId;
-            
             loadCurrentPageData();
         }
 
@@ -256,21 +315,16 @@
             }
         }
 
-        // 通用雲端讀取
         function fetchDataFromCloud(sheet, callback) {
             showLoading(true);
             updateSyncStatus('正在同步雲端資料...');
             fetch(`${SCRIPT_URL}?sheet=${sheet}`)
                 .then(res => res.json())
-                .then(data => {
-                    callback(data);
-                    updateSyncStatus('☁️ 雲端同步成功');
-                })
+                .then(data => { callback(data); updateSyncStatus('☁️ 雲端同步成功'); })
                 .catch(err => { updateSyncStatus('❌ 讀取失敗，請檢查設定'); })
                 .finally(() => showLoading(false));
         }
 
-        // 通用雲端寫入
         function saveDataToCloud(sheet, dataObj) {
             updateSyncStatus('☁️ 正在存檔至雲端...');
             fetch(`${SCRIPT_URL}?sheet=${sheet}`, {
@@ -288,33 +342,67 @@
                 const ul = col.querySelector('.todo-list');
                 ul.innerHTML = '';
                 const items = todoData[col.id] || [];
+                
                 items.forEach((item, index) => {
                     const li = document.createElement('li');
                     li.className = 'todo-item' + (item.completed ? ' completed' : '');
+                    
+                    // 處理樓層篩選邏輯
+                    if (col.id.startsWith('col-defect-')) {
+                        if (currentFloorFilter !== 'ALL' && item.floor !== currentFloorFilter) {
+                            li.classList.add('hidden-by-filter');
+                        }
+                    }
+
+                    let floorHtml = '';
+                    if (item.floor) {
+                        floorHtml = `<span class="floor-tag">${item.floor}</span>`;
+                    }
+
                     li.innerHTML = `
                         <input type="checkbox" class="todo-checkbox" ${item.completed ? 'checked' : ''} onchange="toggleTodo('${col.id}', ${index})">
-                        <span class="todo-text" onclick="toggleTodo('${col.id}', ${index})">${item.text}</span>
+                        <span class="todo-text" onclick="toggleTodo('${col.id}', ${index})">${floorHtml}${item.text}</span>
                         <button class="delete-btn" onclick="deleteTodo('${col.id}', ${index})">🗑️</button>
                     `;
                     ul.appendChild(li);
                 });
             });
         }
-        function addTodoItem(colId) {
-            const input = document.getElementById(colId).querySelector('.todo-input');
+
+        // ⚡ 樓層篩選切換功能 ⚡
+        function filterFloor(floor, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFloorFilter = floor;
+            renderAllTodos(); // 重新渲染列表（控制顯示/隱藏）
+        }
+
+        function addTodoItem(colId, hasFloor) {
+            const columnEl = document.getElementById(colId);
+            const input = columnEl.querySelector('.todo-input');
             const text = input.value.trim();
             if(!text) return;
+
             if(!todoData[colId]) todoData[colId] = [];
-            todoData[colId].push({ text: text, completed: false });
+
+            let itemObj = { text: text, completed: false };
+            if (hasFloor) {
+                const floorSelect = columnEl.querySelector('.floor-select');
+                itemObj.floor = floorSelect.value;
+            }
+
+            todoData[colId].push(itemObj);
             renderAllTodos();
             saveDataToCloud('todos', todoData);
             input.value = '';
         }
+
         function deleteTodo(colId, index) {
             todoData[colId].splice(index, 1);
             renderAllTodos();
             saveDataToCloud('todos', todoData);
         }
+        
         function toggleTodo(colId, index) {
             todoData[colId][index].completed = !todoData[colId][index].completed;
             renderAllTodos();
@@ -325,42 +413,33 @@
         function renderVendorLogs() {
             const tbody = document.getElementById('vendor-history-tbody');
             tbody.innerHTML = '';
-            // 由新到舊排列顯示
             const displayList = [...vendorLogs].reverse();
             displayList.forEach((log, reversedIndex) => {
                 const actualIndex = vendorLogs.length - 1 - reversedIndex;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${log.date}</td>
-                    <td><strong>${log.name}</strong></td>
-                    <td>${log.time}</td>
+                    <td>${log.date}</td><td><strong>${log.name}</strong></td><td>${log.time}</td>
                     <td><span style="background:#e1f5fe; padding:2px 6px; border-radius:4px;">${log.count}</span></td>
-                    <td>${log.task}</td>
-                    <td><button class="delete-btn" onclick="deleteVendorLog(${actualIndex})">🗑️</button></td>
+                    <td>${log.task}</td><td><button class="delete-btn" onclick="deleteVendorLog(${actualIndex})">🗑️</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
-
+        
         function addVendorLog() {
             const name = document.getElementById('v-name').value;
             const time = document.getElementById('v-time').value;
             const count = document.getElementById('v-count').value;
             const task = document.getElementById('v-task').value.trim();
-            
             if(!task) { alert('請填寫紀錄工項！'); return; }
-
             const today = new Date();
             const dateString = `${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`;
-
             vendorLogs.push({ date: dateString, name: name, time: time, count: count, task: task });
             renderVendorLogs();
             saveDataToCloud('vendor_logs', vendorLogs);
-            
-            // 清空工項輸入框
             document.getElementById('v-task').value = '';
         }
-
+        
         function deleteVendorLog(index) {
             if(confirm('確定要刪除這筆進場紀錄嗎？')) {
                 vendorLogs.splice(index, 1);
@@ -369,7 +448,6 @@
             }
         }
 
-        // 彈窗基地設定
         function openSettings() { document.getElementById('api-url-input').value = SCRIPT_URL; document.getElementById('settings-modal').style.display = 'flex'; }
         function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
         function saveSettings() {
