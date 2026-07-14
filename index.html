@@ -26,7 +26,7 @@
         .settings-btn { background: #7f8c8d; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
         #sync-status { font-size: 0.8rem; color: #7f8c8d; }
 
-        /* 看板排版（拿掉缺失後，剩下兩個主欄位並排） */
+        /* 看板排版 */
         .columns-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 768px) { 
             .columns-container { grid-template-columns: repeat(2, 1fr); }
@@ -112,7 +112,6 @@
     </div>
 
     <script>
-        // 使用原本的儲存 key
         let SCRIPT_URL = localStorage.getItem('script_url') || '';
         let boardData = { "col-todo": [], "col-worker": [] };
 
@@ -125,15 +124,14 @@
             }
         });
 
-        // 讀取資料（只會向試算表的對應分頁讀取今日工作與點工）
+        // 修正：將讀取目標修改回您原本的試算表工作表名稱 "todos"
         function loadCloudData() {
             if (!SCRIPT_URL) return;
             showLoading(true);
             updateSyncStatus('正在讀取雲端資料...');
-            fetch(`${SCRIPT_URL}?sheet=general_board`)
+            fetch(`${SCRIPT_URL}?sheet=todos`)
                 .then(res => res.json())
                 .then(data => {
-                    // 如果雲端資料存在且有 col-todo 欄位，就套用
                     boardData = data && data["col-todo"] ? data : { "col-todo": [], "col-worker": [] };
                     renderBoard();
                     updateSyncStatus('☁️ 雲端讀取成功');
@@ -142,11 +140,11 @@
                 .finally(() => showLoading(false));
         }
 
-        // 存檔資料
+        // 修正：將存檔目標修改回您原本的試算表工作表名稱 "todos"
         function saveCloudData() {
             if (!SCRIPT_URL) return;
             updateSyncStatus('☁️ 正在存檔至雲端...');
-            fetch(`${SCRIPT_URL}?sheet=general_board`, {
+            fetch(`${SCRIPT_URL}?sheet=todos`, {
                 method: 'POST',
                 body: JSON.stringify(boardData)
             })
@@ -155,7 +153,6 @@
             .catch(err => { updateSyncStatus('❌ 雲端存檔失敗'); });
         }
 
-        // 渲染看板畫面
         function renderBoard() {
             ['col-todo', 'col-worker'].forEach(colId => {
                 const colEl = document.getElementById(colId);
@@ -176,7 +173,6 @@
             });
         }
 
-        // 新增項目
         function addItem(colId) {
             const prefix = colId === 'col-todo' ? 'todo' : 'worker';
             const input = document.getElementById(`${prefix}-input`);
@@ -191,21 +187,18 @@
             input.value = '';
         }
 
-        // 刪除項目
         function deleteItem(colId, index) {
             boardData[colId].splice(index, 1);
             renderBoard();
             saveCloudData();
         }
 
-        // 勾選/取消勾選項目
         function toggleItem(colId, index) {
             boardData[colId][index].completed = !boardData[colId][index].completed;
             renderBoard();
             saveCloudData();
         }
 
-        // 設定視窗
         function openSettings() { document.getElementById('api-url-input').value = SCRIPT_URL; document.getElementById('settings-modal').style.display = 'flex'; }
         function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
         function saveSettings() {
