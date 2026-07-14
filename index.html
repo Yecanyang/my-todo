@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>綜合工程管理基地</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #4a90e2;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --border-radius: 12px;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding: 15px; padding-bottom: 50px; }
+        
+        header { text-align: center; margin-bottom: 15px; }
+        header h1 { font-size: 1.5rem; color: #2c3e50; margin-top: 10px; }
+        
+        .header-controls { display: flex; justify-content: space-between; align-items: center; }
+        .settings-btn { background: #7f8c8d; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+        #sync-status { font-size: 0.8rem; color: #7f8c8d; }
+
+        /* 主分頁切換鈕 */
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; background: #ddd; color: #666; transition: 0.2s; }
+        .tab-btn.active { background: var(--primary-color); color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .page-content { display: none; }
+        .page-content.active { display: block; }
+
+        /* 看板樣式 */
+        .main-section { margin-bottom: 30px; background: #eef2f7; padding: 15px; border-radius: var(--border-radius); }
+        .section-title { font-size: 1.2rem; margin-bottom: 15px; padding-left: 8px; border-left: 5px solid var(--primary-color); color: #2c3e50; font-weight: bold; }
+        .columns-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 768px) { .columns-container { grid-template-columns: repeat(3, 1fr); } }
+        .column { background: var(--card-bg); border-radius: var(--border-radius); padding: 15px; display: flex; flex-direction: column; }
+        .column-title { font-size: 1rem; color: #7f8c8d; margin-bottom: 12px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; font-weight: 600; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .todo-input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
+        .add-btn { background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; }
+        .todo-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .todo-item { display: flex; align-items: center; background: #fdfdfd; padding: 10px 12px; border-radius: 8px; border: 1px solid #eaeaea; }
+        .todo-checkbox { width: 18px; height: 18px; margin-right: 10px; }
+        .todo-text { font-size: 0.95rem; flex: 1; word-break: break-all; }
+        .todo-item.completed .todo-text { text-decoration: line-through; color: #b0b0b0; }
+        .delete-btn { background: transparent; color: var(--danger-color); border: none; font-size: 1.1rem; margin-left: 10px; }
+
+        /* 廠商表單與歷史紀錄樣式 */
+        .form-card { background: white; padding: 20px; border-radius: var(--border-radius); margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px; }
+        @media (min-width: 768px) { .form-grid { grid-template-columns: repeat(4, 1fr); } }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 0.9rem; font-weight: bold; color: #555; }
+        .form-control { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; background: #fff; }
+        .submit-btn { background: var(--secondary-color); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; width: 100%; }
+        
+        .history-card { background: white; padding: 15px; border-radius: var(--border-radius); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .table-responsive { overflow-x: auto; }
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; text-align: left; }
+        .history-table th, .history-table td { padding: 12px; border-bottom: 1px solid #eee; }
+        .history-table th { background: #f8f9fa; color: #666; }
+        .history-table tr:hover { background: #fdfdfd; }
+
+        /* 彈窗與遮罩 */
+        #settings-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 20px; border-radius: var(--border-radius); width: 90%; max-width: 500px; }
+        .modal-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin: 15px 0; }
+        .modal-btns { display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-save { background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; }
+        .btn-cancel { background: #eee; border: none; padding: 8px 16px; border-radius: 8px; }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); display: flex; justify-content: center; align-items: center; font-weight: bold; z-index: 9999; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay" style="display: none;">☁️ 正在與雲端同步資料...</div>
+
+    <header>
+        <div class="header-controls">
+            <button class="settings-btn" onclick="openSettings()">⚙️ 設定基地網址</button>
+            <div id="sync-status">未設定基地網址</div>
+        </div>
+        <h1>📋 綜合工程管理基地</h1>
+    </header>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchPage('todo-page', this)">💼 工作看板</button>
+        <button class="tab-btn" onclick="switchPage('vendor-page', this)">🚛 廠商進場紀錄</button>
+    </div>
+
+    <div id="settings-modal">
+        <div class="modal-content">
+            <h3>⚙️ 雲端基地網址設置</h3>
+            <input type="text" id="api-url-input" class="modal-input" placeholder="https://script.google.com/macros/s/.../exec">
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeSettings()">取消</button>
+                <button class="btn-save" onclick="saveSettings()">儲存並載入</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="todo-page" class="page-content active">
+        <div class="main-section">
+            <div class="section-title">💼 我的工作</div>
+            <div class="columns-container">
+                <div class="column" id="col-myjob-1">
+                    <div class="column-title">請款</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增請款項目..."><button class="add-btn" onclick="addTodoItem('col-myjob-1')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+                <div class="column" id="col-myjob-2">
+                    <div class="column-title">寄信清單</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增寄信任務..."><button class="add-btn" onclick="addTodoItem('col-myjob-2')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+                <div class="column" id="col-myjob-3">
+                    <div class="column-title">零用金</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增零用金記錄..."><button class="add-btn" onclick="addTodoItem('col-myjob-3')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="main-section">
+            <div class="section-title">👷 點工工作</div>
+            <div class="columns-container">
+                <div class="column" id="col-point-1">
+                    <div class="column-title">進行中</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增進行中項目..."><button class="add-btn" onclick="addTodoItem('col-point-1')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+                <div class="column" id="col-point-2">
+                    <div class="column-title">尚未完成</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增待辦項目..."><button class="add-btn" onclick="addTodoItem('col-point-2')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+                <div class="column" id="col-point-3">
+                    <div class="column-title">已完成</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增已完成記錄..."><button class="add-btn" onclick="addTodoItem('col-point-3')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="main-section">
+            <div class="section-title">🔧 缺失修改分類</div>
+            <div class="columns-container">
+                <div class="column" id="col-defect-1">
+                    <div class="column-title">AB棟</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增AB棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-1')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+                <div class="column" id="col-defect-2">
+                    <div class="column-title">DE棟</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增DE棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-2')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+                <div class="column" id="col-defect-3">
+                    <div class="column-title">FG棟</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增FG棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-3')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="vendor-page" class="page-content">
+        <div class="form-card">
+            <div class="section-title">✍️ 新增今日進場紀錄</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>選擇廠商</label>
+                    <select id="v-name" class="form-control">
+                        <option value="川福">川福</option><option value="佳祐">佳祐</option>
+                        <option value="琮威">琮威</option><option value="嵐霏">嵐霏</option>
+                        <option value="和生">和生</option><option value="中保">中保</option>
+                        <option value="宗群">宗群</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>進場時間</label>
+                    <input type="time" id="v-time" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>出工人數</label>
+                    <select id="v-count" class="form-control">
+                        <script>
+                            for(let i=1; i<=20; i++) document.write(`<option value="${i}人">${i}人</option>`);
+                        </script>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>紀錄工項</label>
+                    <input type="text" id="v-task" class="form-control" placeholder="輸入今日施作工項...">
+                </div>
+            </div>
+            <button class="submit-btn" onclick="addVendorLog()">➕ 送出紀錄至雲端</button>
+        </div>
+
+        <div class="history-card">
+            <div class="section-title">📜 歷史進場日誌 (由新到舊)</div>
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>日期</th><th>廠商</th><th>時間</th><th>人數</th><th>紀錄工項</th><th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vendor-history-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let SCRIPT_URL = localStorage.getItem('todo_script_url') || '';
+        let todoData = {};
+        let vendorLogs = [];
+        let currentPage = 'todo-page';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 自動帶入今天目前的時間
+            const now = new Date();
+            const timeString = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('v-time').value = timeString;
+
+            if (SCRIPT_URL) {
+                loadCurrentPageData();
+            } else {
+                updateSyncStatus('⚠️ 請先設定基地網址');
+                openSettings();
+            }
+        });
+
+        // 分頁切換
+        function switchPage(pageId, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById(pageId).classList.add('active');
+            currentPage = pageId;
+            
+            loadCurrentPageData();
+        }
+
+        function loadCurrentPageData() {
+            if (!SCRIPT_URL) return;
+            if (currentPage === 'todo-page') {
+                fetchDataFromCloud('todos', (data) => { todoData = data; renderAllTodos(); });
+            } else {
+                fetchDataFromCloud('vendor_logs', (data) => { vendorLogs = data; renderVendorLogs(); });
+            }
+        }
+
+        // 通用雲端讀取
+        function fetchDataFromCloud(sheet, callback) {
+            showLoading(true);
+            updateSyncStatus('正在同步雲端資料...');
+            fetch(`${SCRIPT_URL}?sheet=${sheet}`)
+                .then(res => res.json())
+                .then(data => {
+                    callback(data);
+                    updateSyncStatus('☁️ 雲端同步成功');
+                })
+                .catch(err => { updateSyncStatus('❌ 讀取失敗，請檢查設定'); })
+                .finally(() => showLoading(false));
+        }
+
+        // 通用雲端寫入
+        function saveDataToCloud(sheet, dataObj) {
+            updateSyncStatus('☁️ 正在存檔至雲端...');
+            fetch(`${SCRIPT_URL}?sheet=${sheet}`, {
+                method: 'POST',
+                body: JSON.stringify(dataObj)
+            })
+            .then(res => res.json())
+            .then(data => { if(data.status === 'success') updateSyncStatus('☁️ 雲端存檔成功'); })
+            .catch(err => { updateSyncStatus('❌ 雲端存檔失敗'); });
+        }
+
+        // --- 看板邏輯 ---
+        function renderAllTodos() {
+            document.querySelectorAll('.column').forEach(col => {
+                const ul = col.querySelector('.todo-list');
+                ul.innerHTML = '';
+                const items = todoData[col.id] || [];
+                items.forEach((item, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'todo-item' + (item.completed ? ' completed' : '');
+                    li.innerHTML = `
+                        <input type="checkbox" class="todo-checkbox" ${item.completed ? 'checked' : ''} onchange="toggleTodo('${col.id}', ${index})">
+                        <span class="todo-text" onclick="toggleTodo('${col.id}', ${index})">${item.text}</span>
+                        <button class="delete-btn" onclick="deleteTodo('${col.id}', ${index})">🗑️</button>
+                    `;
+                    ul.appendChild(li);
+                });
+            });
+        }
+        function addTodoItem(colId) {
+            const input = document.getElementById(colId).querySelector('.todo-input');
+            const text = input.value.trim();
+            if(!text) return;
+            if(!todoData[colId]) todoData[colId] = [];
+            todoData[colId].push({ text: text, completed: false });
+            renderAllTodos();
+            saveDataToCloud('todos', todoData);
+            input.value = '';
+        }
+        function deleteTodo(colId, index) {
+            todoData[colId].splice(index, 1);
+            renderAllTodos();
+            saveDataToCloud('todos', todoData);
+        }
+        function toggleTodo(colId, index) {
+            todoData[colId][index].completed = !todoData[colId][index].completed;
+            renderAllTodos();
+            saveDataToCloud('todos', todoData);
+        }
+
+        // --- 廠商紀錄邏輯 ---
+        function renderVendorLogs() {
+            const tbody = document.getElementById('vendor-history-tbody');
+            tbody.innerHTML = '';
+            // 由新到舊排列顯示
+            const displayList = [...vendorLogs].reverse();
+            displayList.forEach((log, reversedIndex) => {
+                const actualIndex = vendorLogs.length - 1 - reversedIndex;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${log.date}</td>
+                    <td><strong>${log.name}</strong></td>
+                    <td>${log.time}</td>
+                    <td><span style="background:#e1f5fe; padding:2px 6px; border-radius:4px;">${log.count}</span></td>
+                    <td>${log.task}</td>
+                    <td><button class="delete-btn" onclick="deleteVendorLog(${actualIndex})">🗑️</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addVendorLog() {
+            const name = document.getElementById('v-name').value;
+            const time = document.getElementById('v-time').value;
+            const count = document.getElementById('v-count').value;
+            const task = document.getElementById('v-task').value.trim();
+            
+            if(!task) { alert('請填寫紀錄工項！'); return; }
+
+            const today = new Date();
+            const dateString = `${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`;
+
+            vendorLogs.push({ date: dateString, name: name, time: time, count: count, task: task });
+            renderVendorLogs();
+            saveDataToCloud('vendor_logs', vendorLogs);
+            
+            // 清空工項輸入框
+            document.getElementById('v-task').value = '';
+        }
+
+        function deleteVendorLog(index) {
+            if(confirm('確定要刪除這筆進場紀錄嗎？')) {
+                vendorLogs.splice(index, 1);
+                renderVendorLogs();
+                saveDataToCloud('vendor_logs', vendorLogs);
+            }
+        }
+
+        // 彈窗基地設定
+        function openSettings() { document.getElementById('api-url-input').value = SCRIPT_URL; document.getElementById('settings-modal').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
+        function saveSettings() {
+            const val = document.getElementById('api-url-input').value.trim();
+            if(!val) return;
+            localStorage.setItem('todo_script_url', val);
+            SCRIPT_URL = val;
+            closeSettings();
+            loadCurrentPageData();
+        }
+        function showLoading(show) { document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none'; }
+        function updateSyncStatus(msg) { document.getElementById('sync-status').innerText = msg; }
+    </script>
+</body>
+</html>
