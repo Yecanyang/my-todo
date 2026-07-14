@@ -26,7 +26,7 @@
         .settings-btn { background: #7f8c8d; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
         #sync-status { font-size: 0.8rem; color: #7f8c8d; }
 
-        /* 看板排版 */
+        /* 依然維持原本的三欄式並排排版樣式，僅放置今日工作與點工 */
         .columns-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 768px) { 
             .columns-container { grid-template-columns: repeat(2, 1fr); }
@@ -112,6 +112,7 @@
     </div>
 
     <script>
+        // 沿用您原本的 script_url
         let SCRIPT_URL = localStorage.getItem('script_url') || '';
         let boardData = { "col-todo": [], "col-worker": [] };
 
@@ -124,7 +125,7 @@
             }
         });
 
-        // 修正：將讀取目標修改回您原本的試算表工作表名稱 "todos"
+        // 讀取原本 todos 頁籤的資料
         function loadCloudData() {
             if (!SCRIPT_URL) return;
             showLoading(true);
@@ -132,6 +133,7 @@
             fetch(`${SCRIPT_URL}?sheet=todos`)
                 .then(res => res.json())
                 .then(data => {
+                    // 僅獲取今日工作與點工資料，不影響雲端中的其他結構
                     boardData = data && data["col-todo"] ? data : { "col-todo": [], "col-worker": [] };
                     renderBoard();
                     updateSyncStatus('☁️ 雲端讀取成功');
@@ -140,7 +142,7 @@
                 .finally(() => showLoading(false));
         }
 
-        // 修正：將存檔目標修改回您原本的試算表工作表名稱 "todos"
+        // 存檔至原本 todos 頁籤
         function saveCloudData() {
             if (!SCRIPT_URL) return;
             updateSyncStatus('☁️ 正在存檔至雲端...');
