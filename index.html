@@ -42,12 +42,17 @@
         .filter-btn { background: #eee; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-weight: 500; transition: 0.2s; }
         .filter-btn.active { background: #e65100; color: white; font-weight: bold; }
 
+        /* 欄位容器排版：預設手機一列，電腦版自適應 */
         .columns-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media (min-width: 768px) { .columns-container { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 768px) { 
+            .grid-4 { grid-template-columns: repeat(4, 1fr); } /* 我的工作四欄 */
+            .grid-3 { grid-template-columns: repeat(3, 1fr); } /* 其他維持三欄 */
+        }
+        
         .column { background: var(--card-bg); border-radius: var(--border-radius); padding: 15px; display: flex; flex-direction: column; }
         .column-title { font-size: 1rem; color: #7f8c8d; margin-bottom: 12px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; font-weight: 600; }
         
-        /* 帶有樓層選單的輸入群組 */
+        /* 帶有選單的輸入群組 */
         .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
         .input-row { display: flex; gap: 6px; }
         .floor-select { width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #fff; }
@@ -56,13 +61,13 @@
         
         .todo-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
         .todo-item { display: flex; align-items: center; background: #fdfdfd; padding: 10px 12px; border-radius: 8px; border: 1px solid #eaeaea; }
-        .todo-item.hidden-by-filter { display: none !important; } /* 被篩選隱藏的樣式 */
+        .todo-item.hidden-by-filter { display: none !important; }
         .todo-checkbox { width: 18px; height: 18px; margin-right: 10px; cursor: pointer; }
         .todo-text { font-size: 0.95rem; flex: 1; word-break: break-all; }
         .todo-item.completed .todo-text { text-decoration: line-through; color: #b0b0b0; }
         .delete-btn { background: transparent; color: var(--danger-color); border: none; font-size: 1.1rem; margin-left: 10px; cursor: pointer; }
         
-        /* 樓層標籤樣式 (橘色調更醒目) */
+        /* 樓層標籤樣式 */
         .floor-tag { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; padding: 1px 5px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-right: 6px; display: inline-block; }
 
         /* 廠商表單與歷史紀錄樣式 */
@@ -120,9 +125,10 @@
     </div>
 
     <div id="todo-page" class="page-content active">
+        
         <div class="main-section">
             <div class="section-title">💼 我的工作</div>
-            <div class="columns-container">
+            <div class="columns-container grid-4">
                 <div class="column" id="col-myjob-1">
                     <div class="column-title">請款</div>
                     <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增請款項目..."><button class="add-btn" onclick="addTodoItem('col-myjob-1', false)">+</button></div></div>
@@ -138,11 +144,17 @@
                     <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增零用金記錄..."><button class="add-btn" onclick="addTodoItem('col-myjob-3', false)">+</button></div></div>
                     <ul class="todo-list"></ul>
                 </div>
+                <div class="column" id="col-myjob-4">
+                    <div class="column-title">其他</div>
+                    <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增其他雜項..."><button class="add-btn" onclick="addTodoItem('col-myjob-4', false)">+</button></div></div>
+                    <ul class="todo-list"></ul>
+                </div>
             </div>
         </div>
+        
         <div class="main-section">
             <div class="section-title">👷 點工工作</div>
-            <div class="columns-container">
+            <div class="columns-container grid-3">
                 <div class="column" id="col-point-1">
                     <div class="column-title">進行中</div>
                     <div class="input-group"><div class="input-row"><input type="text" class="todo-input" placeholder="新增進行中項目..."><button class="add-btn" onclick="addTodoItem('col-point-1', false)">+</button></div></div>
@@ -176,7 +188,7 @@
                 <button class="filter-btn" onclick="filterFloor('8F', this)">8F</button>
             </div>
 
-            <div class="columns-container">
+            <div class="columns-container grid-3">
                 <div class="column" id="col-defect-1">
                     <div class="column-title">AB棟</div>
                     <div class="input-group">
@@ -187,8 +199,7 @@
                                 <option value="6F">6F</option><option value="7F">7F</option>
                                 <option value="8F">8F</option>
                             </select>
-                            <input type="text" class="todo-input" placeholder="新增AB棟缺失...">
-                            <button class="add-btn" onclick="addTodoItem('col-defect-1', true)">+</button>
+                            <input type="text" class="todo-input" placeholder="新增AB棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-1', true)">+</button>
                         </div>
                     </div>
                     <ul class="todo-list"></ul>
@@ -203,8 +214,7 @@
                                 <option value="6F">6F</option><option value="7F">7F</option>
                                 <option value="8F">8F</option>
                             </select>
-                            <input type="text" class="todo-input" placeholder="新增DE棟缺失...">
-                            <button class="add-btn" onclick="addTodoItem('col-defect-2', true)">+</button>
+                            <input type="text" class="todo-input" placeholder="新增DE棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-2', true)">+</button>
                         </div>
                     </div>
                     <ul class="todo-list"></ul>
@@ -219,8 +229,7 @@
                                 <option value="6F">6F</option><option value="7F">7F</option>
                                 <option value="8F">8F</option>
                             </select>
-                            <input type="text" class="todo-input" placeholder="新增FG棟缺失...">
-                            <button class="add-btn" onclick="addTodoItem('col-defect-3', true)">+</button>
+                            <input type="text" class="todo-input" placeholder="新增FG棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-3', true)">+</button>
                         </div>
                     </div>
                     <ul class="todo-list"></ul>
@@ -282,7 +291,7 @@
         let todoData = {};
         let vendorLogs = [];
         let currentPage = 'todo-page';
-        let currentFloorFilter = 'ALL'; // 目前篩選的樓層
+        let currentFloorFilter = 'ALL';
 
         document.addEventListener('DOMContentLoaded', () => {
             const now = new Date();
@@ -347,7 +356,6 @@
                     const li = document.createElement('li');
                     li.className = 'todo-item' + (item.completed ? ' completed' : '');
                     
-                    // 處理樓層篩選邏輯
                     if (col.id.startsWith('col-defect-')) {
                         if (currentFloorFilter !== 'ALL' && item.floor !== currentFloorFilter) {
                             li.classList.add('hidden-by-filter');
@@ -369,12 +377,11 @@
             });
         }
 
-        // ⚡ 樓層篩選切換功能 ⚡
         function filterFloor(floor, btn) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentFloorFilter = floor;
-            renderAllTodos(); // 重新渲染列表（控制顯示/隱藏）
+            renderAllTodos();
         }
 
         function addTodoItem(colId, hasFloor) {
