@@ -35,8 +35,14 @@
         /* 看板樣式 */
         .main-section { margin-bottom: 30px; background: #eef2f7; padding: 15px; border-radius: var(--border-radius); }
         .section-title { font-size: 1.2rem; margin-bottom: 15px; padding-left: 8px; border-left: 5px solid var(--primary-color); color: #2c3e50; font-weight: bold; }
+        
+        /* 彈性欄位排版 */
         .columns-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        @media (min-width: 768px) { .columns-container { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 768px) { 
+            .columns-container { grid-template-columns: repeat(3, 1fr); } 
+            .columns-4 { grid-template-columns: repeat(4, 1fr); } /* 讓「我的工作」自適應呈現4欄 */
+        }
+        
         .column { background: var(--card-bg); border-radius: var(--border-radius); padding: 15px; display: flex; flex-direction: column; }
         .column-title { font-size: 1rem; color: #7f8c8d; margin-bottom: 12px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; font-weight: 600; }
         .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -106,7 +112,7 @@
     <div id="todo-page" class="page-content active">
         <div class="main-section">
             <div class="section-title">💼 我的工作</div>
-            <div class="columns-container">
+            <div class="columns-container columns-4">
                 <div class="column" id="col-myjob-1">
                     <div class="column-title">請款</div>
                     <div class="input-group"><input type="text" class="todo-input" placeholder="新增請款項目..."><button class="add-btn" onclick="addTodoItem('col-myjob-1')">+</button></div>
@@ -122,8 +128,14 @@
                     <div class="input-group"><input type="text" class="todo-input" placeholder="新增零用金記錄..."><button class="add-btn" onclick="addTodoItem('col-myjob-3')">+</button></div>
                     <ul class="todo-list"></ul>
                 </div>
+                <div class="column" id="col-myjob-4">
+                    <div class="column-title">其他</div>
+                    <div class="input-group"><input type="text" class="todo-input" placeholder="新增其他項目..."><button class="add-btn" onclick="addTodoItem('col-myjob-4')">+</button></div>
+                    <ul class="todo-list"></ul>
+                </div>
             </div>
         </div>
+        
         <div class="main-section">
             <div class="section-title">👷 點工工作</div>
             <div class="columns-container">
@@ -144,7 +156,7 @@
                 </div>
             </div>
         </div>
-        </div>
+    </div>
 
     <div id="vendor-page" class="page-content">
         <div class="form-card">
