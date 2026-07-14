@@ -42,21 +42,22 @@
         .filter-btn { background: #eee; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-weight: 500; transition: 0.2s; }
         .filter-btn.active { background: #e65100; color: white; font-weight: bold; }
 
-        /* 欄位容器排版：預設手機一列，電腦版自適應 */
+        /* 欄位容器排版 */
         .columns-container { display: grid; grid-template-columns: 1fr; gap: 15px; }
         @media (min-width: 768px) { 
-            .grid-4 { grid-template-columns: repeat(4, 1fr); } /* 我的工作四欄 */
-            .grid-3 { grid-template-columns: repeat(3, 1fr); } /* 其他維持三欄 */
+            .grid-4 { grid-template-columns: repeat(4, 1fr); }
+            .grid-3 { grid-template-columns: repeat(3, 1fr); }
         }
         
         .column { background: var(--card-bg); border-radius: var(--border-radius); padding: 15px; display: flex; flex-direction: column; }
         .column-title { font-size: 1rem; color: #7f8c8d; margin-bottom: 12px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; font-weight: 600; }
         
-        /* 帶有選單的輸入群組 */
+        /* 帶有樓層與戶別選單的輸入群組 */
         .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-        .input-row { display: flex; gap: 6px; }
-        .floor-select { width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #fff; }
-        .todo-input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
+        .input-row { display: flex; flex-wrap: wrap; gap: 6px; }
+        .floor-select { width: 65px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #fff; }
+        .unit-select { width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #fff; }
+        .todo-input { flex: 1; min-width: 120px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
         .add-btn { background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
         .todo-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
@@ -67,7 +68,7 @@
         .todo-item.completed .todo-text { text-decoration: line-through; color: #b0b0b0; }
         .delete-btn { background: transparent; color: var(--danger-color); border: none; font-size: 1.1rem; margin-left: 10px; cursor: pointer; }
         
-        /* 樓層標籤樣式 */
+        /* 樓層戶別標籤樣式 */
         .floor-tag { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; padding: 1px 5px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-right: 6px; display: inline-block; }
 
         /* 廠商表單與歷史紀錄樣式 */
@@ -194,40 +195,48 @@
                     <div class="input-group">
                         <div class="input-row">
                             <select class="floor-select">
-                                <option value="2F" selected>2F</option><option value="3F">3F</option>
-                                <option value="4F">4F</option><option value="5F">5F</option>
-                                <option value="6F">6F</option><option value="7F">7F</option>
-                                <option value="8F">8F</option>
+                                <option value="2F">2F</option><option value="3F">3F</option><option value="4F">4F</option>
+                                <option value="5F">5F</option><option value="6F">6F</option><option value="7F">7F</option><option value="8F">8F</option>
+                            </select>
+                            <select class="unit-select">
+                                <option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option><option value="A5">A5</option><option value="A6">A6</option>
+                                <option value="B1">B1</option><option value="B2">B2</option><option value="B3">B3</option><option value="B5">B5</option><option value="B6">B6</option>
                             </select>
                             <input type="text" class="todo-input" placeholder="新增AB棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-1', true)">+</button>
                         </div>
                     </div>
                     <ul class="todo-list"></ul>
                 </div>
+                
                 <div class="column" id="col-defect-2">
                     <div class="column-title">DE棟</div>
                     <div class="input-group">
                         <div class="input-row">
                             <select class="floor-select">
-                                <option value="2F" selected>2F</option><option value="3F">3F</option>
-                                <option value="4F">4F</option><option value="5F">5F</option>
-                                <option value="6F">6F</option><option value="7F">7F</option>
-                                <option value="8F">8F</option>
+                                <option value="2F">2F</option><option value="3F">3F</option><option value="4F">4F</option>
+                                <option value="5F">5F</option><option value="6F">6F</option><option value="7F">7F</option><option value="8F">8F</option>
+                            </select>
+                            <select class="unit-select">
+                                <option value="D1">D1</option><option value="D2">D2</option><option value="D3">D3</option><option value="D5">D5</option><option value="D6">D6</option>
+                                <option value="E1">E1</option><option value="E2">E2</option><option value="E3">E3</option><option value="E5">E5</option><option value="E6">E6</option>
                             </select>
                             <input type="text" class="todo-input" placeholder="新增DE棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-2', true)">+</button>
                         </div>
                     </div>
                     <ul class="todo-list"></ul>
                 </div>
+                
                 <div class="column" id="col-defect-3">
                     <div class="column-title">FG棟</div>
                     <div class="input-group">
                         <div class="input-row">
                             <select class="floor-select">
-                                <option value="2F" selected>2F</option><option value="3F">3F</option>
-                                <option value="4F">4F</option><option value="5F">5F</option>
-                                <option value="6F">6F</option><option value="7F">7F</option>
-                                <option value="8F">8F</option>
+                                <option value="2F">2F</option><option value="3F">3F</option><option value="4F">4F</option>
+                                <option value="5F">5F</option><option value="6F">6F</option><option value="7F">7F</option><option value="8F">8F</option>
+                            </select>
+                            <select class="unit-select">
+                                <option value="F1">F1</option><option value="F2">F2</option><option value="F3">F3</option><option value="F5">F5</option><option value="F6">F6</option>
+                                <option value="G1">G1</option><option value="G2">G2</option><option value="G3">G3</option><option value="G5">G5</option><option value="G6">G6</option>
                             </select>
                             <input type="text" class="todo-input" placeholder="新增FG棟缺失..."><button class="add-btn" onclick="addTodoItem('col-defect-3', true)">+</button>
                         </div>
@@ -362,14 +371,16 @@
                         }
                     }
 
-                    let floorHtml = '';
+                    let tagHtml = '';
                     if (item.floor) {
-                        floorHtml = `<span class="floor-tag">${item.floor}</span>`;
+                        // 如果有戶別資料，標籤合併顯示為 [樓層-戶別]
+                        const displayTag = item.unit ? `${item.floor}-${item.unit}` : item.floor;
+                        tagHtml = `<span class="floor-tag">${displayTag}</span>`;
                     }
 
                     li.innerHTML = `
                         <input type="checkbox" class="todo-checkbox" ${item.completed ? 'checked' : ''} onchange="toggleTodo('${col.id}', ${index})">
-                        <span class="todo-text" onclick="toggleTodo('${col.id}', ${index})">${floorHtml}${item.text}</span>
+                        <span class="todo-text" onclick="toggleTodo('${col.id}', ${index})">${tagHtml}${item.text}</span>
                         <button class="delete-btn" onclick="deleteTodo('${col.id}', ${index})">🗑️</button>
                     `;
                     ul.appendChild(li);
@@ -384,7 +395,7 @@
             renderAllTodos();
         }
 
-        function addTodoItem(colId, hasFloor) {
+        function addTodoItem(colId, hasFloorAndUnit) {
             const columnEl = document.getElementById(colId);
             const input = columnEl.querySelector('.todo-input');
             const text = input.value.trim();
@@ -393,9 +404,11 @@
             if(!todoData[colId]) todoData[colId] = [];
 
             let itemObj = { text: text, completed: false };
-            if (hasFloor) {
+            if (hasFloorAndUnit) {
                 const floorSelect = columnEl.querySelector('.floor-select');
+                const unitSelect = columnEl.querySelector('.unit-select');
                 itemObj.floor = floorSelect.value;
+                itemObj.unit = unitSelect.value;
             }
 
             todoData[colId].push(itemObj);
